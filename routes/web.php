@@ -12,7 +12,6 @@ Route::group(['prefix' => 'setup', 'middleware' => ['check.requirement']], funct
     Route::get('/admin', [SetupController::class, 'adminForm'])->name('setup.admin');
     Route::post('/admin', [SetupController::class, 'saveAdmin'])->name('setup.admin.save');
 });
-
 Route::get('/', function () {
     return view('welcome');
-})->name('welcome');
+})->name('welcome')->middleware('check.installed');

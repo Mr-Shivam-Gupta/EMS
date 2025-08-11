@@ -15,8 +15,8 @@ class CheckIfInstalled
      */
     public function handle(Request $request, Closure $next): Response
     {
-          if (!env('APP_INSTALLED', false) && !str_starts_with($request->path(), 'setup')) {
-            return redirect()->route('setup.index');
+        if (!env('APP_INSTALLED', false) && !str_starts_with($request->path(), 'setup')) {
+            return redirect()->route('setup.requirements');
         }
         return $next($request);
     }

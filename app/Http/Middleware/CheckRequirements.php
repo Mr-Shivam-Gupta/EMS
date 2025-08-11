@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\DB;
 
 class CheckRequirements
 {
@@ -38,14 +37,6 @@ class CheckRequirements
                 $errors[] = "Folder not writable: $path";
             }
         }
-
-        // If DB is already set, test connection
-        try {
-            DB::connection()->getPdo();
-        } catch (\Exception $e) {
-            $errors[] = "Database connection failed: " . $e->getMessage();
-        }
-
         // If any errors, redirect to setup
         if ($errors && !$request->is('setup/*')) {
             return redirect()->route('setup.requirements')->with('errors', $errors);

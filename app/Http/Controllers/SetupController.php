@@ -48,9 +48,23 @@ class SetupController extends Controller
         $this->setEnv('SESSION_DRIVER', 'file');
         Artisan::call('config:clear');
         try {
+            if ($request->DB_CONNECTION !== 'sqlite') {
+                $tempConfig = [
+                    'driver'   => $request->DB_CONNECTION,
+                    'host'     => $request->DB_HOST,
+                    'port'     => $request->DB_PORT,
+                    'database' => '',
+                    'username' => $request->DB_USERNAME,
+                    'password' => $request->DB_PASSWORD,
+                ];
+                DB::purge('temp');
+                config(['database.connections.temp' => $tempConfig]);
+                DB::connection('temp')->getPdo()->exec(
+                    "CREATE DATABASE IF NOT EXISTS `" . $request->DB_DATABASE . "`"
+                );
+            }
             DB::purge();
             config([
-
                 'database.default' => $request->DB_CONNECTION,
                 'database.connections.' . $request->DB_CONNECTION . '.host'     => $request->DB_HOST,
                 'database.connections.' . $request->DB_CONNECTION . '.port'     => $request->DB_PORT,
@@ -61,14 +75,17 @@ class SetupController extends Controller
             DB::reconnect();
             DB::connection()->getPdo();
             Artisan::call('migrate', ['--force' => true]);
+            return redirect()->route('setup.admin');
         } catch (\Exception $e) {
             return back()->withErrors([
                 'DB_DATABASE' => 'Database connection failed: ' . $e->getMessage()
             ]);
         }
-        return redirect('/');
     }
-
+    public function adminForm()
+    {
+        dd('admin page');
+    }
     private function setEnv($key, $value)
     {
         $path = base_path('.env');
